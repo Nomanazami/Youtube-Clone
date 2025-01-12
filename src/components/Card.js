@@ -1,75 +1,191 @@
+// import React from 'react'
+// import styled from "styled-components";
+// import { Link } from 'react-router-dom';
+// import {format} from "timeago.js"
+// import { useState,useEffect } from 'react';
+// import axios from 'axios';
 
-import React from 'react'
+
+// const Container = styled.div`
+// width:360px;
+// margin-bottom: ${(props) => (props.type === "sm" ? "10px" : "45px")};
+// cursor: pointer;
+// display: ${(props) => props.type === "sm" && "flex"};
+// gap:10px;
+// `;
+// const Image = styled.img`
+// width:100%;
+// height: ${(props) => (props.type === "sm" ? "120px" : "202px")};
+// background-color:gray;
+// flex:1;
+
+// `;
+
+// const Details = styled.div`
+// display:flex;
+// margin-top: ${(props) => props.type !== "sm" && "16px"};
+// gap:12px;
+// flex:1;
+
+// `;
+// const ChannelImage = styled.img`
+// width:36px;
+// height:36px;
+// border-radius: 50%;
+// background-color: gray;
+// display: ${(props) => props.type === "sm" && "none"};
+// `;
+// const Texts = styled.div`
+
+// `;
+// const Title = styled.h1`
+// font-size:16px;
+// font-weight:500;
+// color:${({ theme }) => theme.text}
+// `;
+// const ChannelName = styled.h2`
+// font-size:14px;
+// ${({ theme }) => theme.textSoft};
+// margin : 9px 0;
+// `;
+// const Info = styled.div`
+// font-size:14px;
+// ${({ theme }) => theme.textSoft};
+
+// `;
+
+// function Card({ type, video }) {
+//   const [channel, setChannel] = useState({});
+
+//   useEffect(() => {
+//     const fetchChannel = async () => {
+//       const res = await axios.get(`http://localhost:8800/api/users/find/${video.userId}`);
+//       console.log("channel",res.data);
+//       setChannel(res.data);
+//     };
+//     fetchChannel();
+//   }, [video.userId]);
+//   return (
+//     <Link to={`/videos/${video._id}`} style={{textDecoration:"none"}}>
+
+// <Container type={type}>
+//         <Image
+//           type={type}
+//           src={video.imgUrl}
+//         />
+//         <Details type={type}>
+//           <ChannelImage
+//             type={type}
+//             src={channel?.img}
+//           />
+//           <Texts>
+//             <Title>{video.title}</Title>
+//             <ChannelName>{channel?.name}</ChannelName>
+//             <Info>{video.views} views • {format(video.createdAt)}</Info>
+//           </Texts>
+//         </Details>
+//       </Container>
+//     </Link>
+//   )
+// }
+
+// export default Card
+import React,{useState,useEffect} from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { Link } from 'react-router-dom';
-
+import {format} from "timeago.js";
+import axios from "axios";
 
 const Container = styled.div`
-width:360px;
-margin-bottom: ${(props) => (props.type === "sm" ? "10px" : "45px")};
-cursor: pointer;
-display: ${(props) => props.type === "sm" && "flex"};
-gap:10px;
+ // width: ${(props) => props.type !== "sm" && "360px"};
+  margin-bottom: ${(props) => (props.type === "sm" ? "10px" : "45px")};
+  cursor: pointer;
+  display: ${(props) => props.type === "sm" && "flex"};
+  gap: 10px;
 `;
-const Image = styled.img`
-width:100%;
-height: ${(props) => (props.type === "sm" ? "120px" : "202px")};
-background-color:gray;
-flex:1;
 
+const Image = styled.img`
+  width: 100%;
+  height: ${(props) => (props.type === "sm" ? "120px" : "202px")};
+  background-color: #999;
+  flex: 1;
 `;
 
 const Details = styled.div`
-display:flex;
-margin-top: ${(props) => props.type !== "sm" && "16px"};
-gap:12px;
-flex:1;
-
+  display: flex;
+  margin-top: ${(props) => props.type !== "sm" && "16px"};
+  gap: 12px;
+  flex: 1;
 `;
+
 const ChannelImage = styled.img`
-width:36px;
-height:36px;
-border-radius: 50%;
-background-color: gray;
-display: ${(props) => props.type === "sm" && "none"};
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #999;
+  display: ${(props) => props.type === "sm" && "none"};
 `;
-const Texts = styled.div`
 
-`;
+const Texts = styled.div``;
+
 const Title = styled.h1`
-font-size:16px;
-font-weight:500;
-color:${({ theme }) => theme.text}
+  font-size: 16px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.text};
 `;
+
 const ChannelName = styled.h2`
-font-size:14px;
-${({ theme }) => theme.textSoft};
-margin : 9px 0;
+  font-size: 14px;
+  color: ${({ theme }) => theme.textSoft};
+  margin: 9px 0px;
 `;
+
 const Info = styled.div`
-font-size:14px;
-${({ theme }) => theme.textSoft};
-
+  font-size: 14px;
+  color: ${({ theme }) => theme.textSoft};
 `;
 
-function Card({ type,photo }) {
+const Card = ({ type,photo,video }) => {
+  // console.log("video",video,"type",type)
 
+  const [channel,setChannel]=useState([]);
+
+  useEffect(()=>{
+    const fetchChannel=async()=>{
+      
+      const res = await axios.get(`http://localhost:8800/api/users/find/${video.userId}`);
+      setChannel(res.data)
+      // console.log("Channel aagaya hai",res.data)
+      // console.log("channel",channel)
+      
+      
+    }
+    fetchChannel()
+
+  },[video.userId])
+    
   return (
-    <Link to="/video/test" style={{textDecoration:"none"}}>
-
-    <Container type={ type} >
-    <Image src="https://lh5.googleusercontent.com/p/AF1QipMCydsxzp2dQaFWpmL7Os4cWwkSYd2ziifm3gCU=w540-h312-n-k-no" />
-    <Details>
-      <ChannelImage src="https://img.freepik.com/premium-vector/golden-bird-logo-design_1195-336.jpg" />
-      <Texts>
-        <Title>Heart Full "MAKKAH" Video</Title>
-        <ChannelName>Lame Dave</ChannelName>
-        <Info>663,999 views . 1 day ago</Info>
-      </Texts>
-    </Details>
-    </Container>
+    <Link to={`/videos/${video._id}`} style={{ textDecoration: "none" }}>
+      <Container type={type}>
+        <Image
+          type={type}
+          src={video.imgUrl
+          }
+        />
+        <Details type={type}>
+          <ChannelImage
+            type={type}
+            // src={channel.img}
+          />
+          <Texts>
+            <Title>{video.title}</Title>
+            <ChannelName>{channel.name}</ChannelName>
+            <Info>{video.views} views • {format(video.createdAt)}</Info>
+          </Texts>
+        </Details>
+      </Container>
     </Link>
-  )
-}
+  );
+};
 
-export default Card
+export default Card;

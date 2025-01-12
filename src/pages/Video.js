@@ -1,12 +1,22 @@
 import React from "react";
 import styled from "styled-components";
-import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
-import ThumbDownOffAltIcon from "@mui/icons-material/ThumbDownOffAlt";
+import ThumbUpOutlinedIcon from "@mui/icons-material/ThumbUpOutlined";
+import ThumbDownOffAltOutlinedIcon from "@mui/icons-material/ThumbDownOffAltOutlined";
+import ThumbDownIcon from "@mui/icons-material/ThumbDown";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ReplyIcon from "@mui/icons-material/Reply";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
-
+import { useDispatch, useSelector } from "react-redux";
 import Comments from "../components/Comments";
 import Card from "../components/Card";
+import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { dislike, fetchSuccess, like } from "../redux/videoSlice";
+import { subscription } from "../redux/userSlice"
+import { format } from "timeago.js";
+import Recommendation from "../components/Recommendation";
+import { useParams } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -55,9 +65,9 @@ const Hr = styled.hr`
   border: 0.5px solid ${({ theme }) => theme.soft};
 `;
 
-const Recommendation = styled.div`
-  flex: 2;
-`;
+// const Recommendation = styled.div`
+//   flex: 2;
+// `;
 const Channel = styled.div`
   display: flex;
   justify-content: space-between;
@@ -105,31 +115,83 @@ const Subscribe = styled.button`
   padding: 10px 20px;
   cursor: pointer;
 `;
+const VideoFrame = styled.video`
+  max-height: 720px;
+  width: 100%;
+  object-fit: cover;
+`;
+
 function Video() {
+  const { currentUser } = useSelector((state) => state.user);
+  const { currentVideo } = useSelector((state) => state.video);
+  const dispatch = useDispatch();
+
+  //const path = useLocation().pathname.split("/")[2];
+  const { id } = useParams()
+  console.log("id",id);
+  
+  const [channel, setChannel] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const videoRes = await axios.get(`http://localhost:8800/api/videos/find/${id}`);
+        console.log("video",videoRes.data);
+        const channelRes = await axios.get(
+          `http://localhost:8800/api/users/find/${videoRes.data.userId}`
+        );
+        setChannel(channelRes.data);
+        dispatch(fetchSuccess(videoRes.data));
+      } catch (err) {}
+    };
+    fetchData();
+  }, [id, dispatch]);
+  
+  const handleLike = async () => {
+    await axios.put(`http://localhost:8800/api/users/like/${currentVideo._id}`);
+    dispatch(like(currentUser._id));
+  };
+  const handleDislike = async () => {
+    await axios.put(`http://localhost:8800/api/users/dislike/${currentVideo._id}`);
+    dispatch(dislike(currentUser._id));
+  };
+
+  const handleSub = async () => {
+    currentUser.subscribedUsers.includes(channel._id)
+      ? await axios.put(`http://localhost:8800/api//users/unsub/${channel._id}`)
+      : await axios.put(`http://localhost:8800/api//users/sub/${channel._id}`);
+    dispatch(subscription(channel._id));
+  };
+
+
+
   return (
+    
      <Container>
             <Content>
                 <VideoWrapper>
-                    <iframe
-                        width="100%"
-                        height="720"
-                        src="https://www.youtube.com/embed/k3Vfj-e1Ma4"
-                        title="YouTube video player"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                    ></iframe>
+                <VideoFrame src={currentVideo?.videoUrl} controls />
                 </VideoWrapper>
-                <Title>Testing Video</Title>
+                <Title>{currentVideo?.title}</Title>
                 <Details>
-                    <Info>7,948,154 views • Jun 22, 2022</Info>
+                    <Info>{currentVideo?.views}views • {format(currentVideo?.createdAt)}</Info>
                     <Buttons>
-                        <Button>
-                            <ThumbUpOffAltIcon /> 123
-                        </Button>
-                        <Button>
-                            <ThumbDownOffAltIcon /> Dislike
-                        </Button>
+                    <Button onClick={handleLike}>
+              {currentVideo?.likes?.includes(currentUser?._id) ? (
+                <ThumbUpIcon />
+              ) : (
+                <ThumbUpOutlinedIcon />
+              )}{" "}
+              {currentVideo?.likes?.length}
+            </Button>
+            <Button onClick={handleDislike}>
+              {currentVideo.dislikes?.includes(currentUser?._id) ? (
+                <ThumbDownIcon />
+              ) : (
+                <ThumbDownOffAltOutlinedIcon />
+              )}{" "}
+              Dislike
+            </Button>
                         <Button>
                             <ReplyIcon /> Share
                         </Button>
@@ -142,32 +204,25 @@ function Video() {
                 <Hr />
                 <Channel>
                     <ChannelInfo>
-                        <Image src="https://img.freepik.com/premium-vector/golden-bird-logo-design_1195-336.jpg" />
+                        <Image src={channel?.img} />
                         <ChannelDetail>
-                            <ChannelName>Lama Dev</ChannelName>
-                            <ChannelCounter>200K subscribers</ChannelCounter>
+                            <ChannelName>{channel?.name}</ChannelName>
+                            <ChannelCounter>{channel?.subscriber}subscribers</ChannelCounter>
                             <Description>
-                                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                                Doloribus laborum delectus unde quaerat dolore culpa sit aliquam
-                                at. Vitae facere ipsum totam ratione exercitationem. Suscipit
-                                animi accusantium dolores ipsam ut.
+                               {currentVideo?.desc}
                             </Description>
                         </ChannelDetail>
                     </ChannelInfo>
-                    <Subscribe>SUBSCRIBE</Subscribe>
+                    <Subscribe onClick={handleSub}>
+            {currentUser.subscribedUsers?.includes(channel?._id)
+              ? "SUBSCRIBED"
+              : "SUBSCRIBE"}
+          </Subscribe>
                 </Channel>
                 <Hr />
-                <Comments />
+                <Comments videoId={currentVideo?._id} />
             </Content>
-            <Recommendation>
-                <Card type="sm" />
-                <Card type="sm" />
-                <Card type="sm" />
-                <Card type="sm" />
-                <Card type="sm" />
-                <Card type="sm" />
-            
-            </Recommendation>
+            <Recommendation tags={currentVideo?.tags}/>
         </Container>
   )
 }

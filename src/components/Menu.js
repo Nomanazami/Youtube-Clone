@@ -19,6 +19,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import SettingsBrightnessOutlinedIcon from "@mui/icons-material/SettingsBrightnessOutlined";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
 flex:1;
@@ -85,27 +86,35 @@ const Title = styled.h2`
 `;
 
 function Menu({darkMode, setDarkMode}) {
+  const { currentUser } = useSelector((state) => state.user);
   return (
     <Container>
-      <Wrapper>
-      <Link to="/" style={{textDecoration:"none",color:"inherit"}}>
+       <Wrapper>
+        <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
         <Logo>
             <Img src={logo}/>
             Youtube
         </Logo>
         </Link>
         <Item>
-          <HomeIcon/>
-          Home 
+          <HomeIcon />
+          Home
         </Item>
-        <Item>
-          <ExploreOutlinedIcon />
-          Explore
-        </Item>
-        <Item>
-          <SubscriptionsOutlinedIcon />
-          Subscriptions
-        </Item>
+        <Link to="trends" style={{ textDecoration: "none", color: "inherit" }}>
+          <Item>
+            <ExploreOutlinedIcon />
+            Explore
+          </Item>
+        </Link>
+        <Link
+          to="subscriptions"
+          style={{ textDecoration: "none", color: "inherit" }}
+        >
+          <Item>
+            <SubscriptionsOutlinedIcon />
+            Subscriptions
+          </Item>
+        </Link>
         <Hr />
         <Item>
           <VideoLibraryOutlinedIcon />
@@ -116,16 +125,20 @@ function Menu({darkMode, setDarkMode}) {
           History
         </Item>
         <Hr />
-        <Login>
-          Sign in to like videos, comment, and subscribe.
-          <Link to="signin" style={{ textDecoration: "none" }}>
-            <Button>
-              <AccountCircleOutlinedIcon />
-              SIGN IN
-            </Button>
-          </Link>
-        </Login>
-        <Hr />
+        {!currentUser &&
+          <>
+            <Login>
+              Sign in to like videos, comment, and subscribe.
+              <Link to="signin" style={{ textDecoration: "none" }}>
+                <Button>
+                  <AccountCircleOutlinedIcon />
+                  SIGN IN
+                </Button>
+              </Link>
+            </Login>
+            <Hr />
+          </>
+    }
         <Title>BEST OF LAMATUBE</Title>
         <Item>
           <LibraryMusicOutlinedIcon />
@@ -133,7 +146,7 @@ function Menu({darkMode, setDarkMode}) {
         </Item>
         <Item>
           <SportsBasketballOutlinedIcon />
-          Sports    
+          Sports
         </Item>
         <Item>
           <SportsEsportsOutlinedIcon />
@@ -166,7 +179,7 @@ function Menu({darkMode, setDarkMode}) {
         </Item>
         <Item onClick={() => setDarkMode(!darkMode)}>
           <SettingsBrightnessOutlinedIcon />
-          {darkMode ? "Light" : "Dark"} Modem        
+          {darkMode ? "Light" : "Dark"} Mode
         </Item>
       </Wrapper>
     </Container>
